@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault - Indie Publishing Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .game-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+            border-color: #3b82f6;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: #3b82f6;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .game-viewport {
+            height: calc(100vh - 64px);
+            width: 100%;
+            border: none;
+            background: #000;
+        }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-panel px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-2 cursor-pointer" onclick="showGallery()">
+            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4-4-4 4"/><path d="M17 12v9"/><path d="M10 3 6 7l-4-4"/><path d="M6 7v12"/><path d="M20 9V7a2 2 0 0 0-2-2h-3"/><path d="M4 15v2a2 2 0 0 0 2 2h3"/></svg>
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight uppercase">Game<span class="text-blue-500">Vault</span></h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <span id="game-count-badge" class="bg-slate-800 text-slate-400 text-xs px-3 py-1 rounded-full border border-slate-700">0 Games Available</span>
+            <button class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-full text-sm font-semibold transition-all shadow-lg shadow-blue-600/20">
+                Upload
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="container mx-auto px-6 py-12">
+        <section class="mb-12">
+            <h2 class="text-4xl md:text-5xl font-black mb-4">Library</h2>
+            <p class="text-slate-400 text-lg">Click any title to launch the game directly in your browser.</p>
+        </section>
+
+        <!-- Game Grid -->
+        <div id="game-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <!-- Populated by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Game Player View -->
+    <div id="game-player" class="hidden fixed inset-0 z-[60] bg-black flex flex-col">
+        <div class="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6">
+            <div class="flex items-center space-x-4">
+                <button onclick="showGallery()" class="text-slate-400 hover:text-white flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-md text-sm transition-colors border border-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    <span>Exit to Library</span>
+                </button>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <h3 id="current-game-title" class="font-bold text-lg text-blue-400 uppercase tracking-widest">Game Name</h3>
+            </div>
+            <button class="text-slate-400 hover:text-white p-2" onclick="toggleFullscreen()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            </button>
+        </div>
+        
+        <div id="loading-screen" class="flex-grow flex flex-col items-center justify-center space-y-4">
+            <span class="loader"></span>
+            <p class="text-slate-400 animate-pulse font-mono tracking-tighter">MOUNTING VIRTUAL DISK...</p>
+        </div>
+
+        <iframe id="game-iframe" class="game-viewport hidden" src="about:blank"></iframe>
+    </div>
+
+    <script>
+        /**
+         * ADD MORE GAMES HERE
+         * You can add as many as you want.
+         * url: The path to the html file (e.g., 'games/my-game/index.html' or a full URL)
+         */
+        const GAME_LIST = [
+            {
+                id: 'neon-runner',
+                title: 'Neon Runner',
+                description: 'A high-speed synthwave avoidance game with procedural obstacles.',
+                thumbnail: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-1', // Replace with your actual .html file path
+                category: 'Arcade',
+                color: '#ec4899'
+            },
+            {
+                id: 'pixel-quest',
+                title: 'Pixel Quest',
+                description: 'Classic 8-bit RPG adventure. Explore dungeons and collect loot.',
+                thumbnail: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-2', 
+                category: 'Adventure',
+                color: '#22c55e'
+            },
+            {
+                id: 'void-racer',
+                title: 'Void Racer',
+                description: 'Drift through the vacuum of space in this cosmic racing simulator.',
+                thumbnail: 'https://images.unsplash.com/photo-1614728263952-84ea206f2c40?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-3',
+                category: 'Racing',
+                color: '#9333ea'
+            },
+            {
+                id: 'logic-grid',
+                title: 'Logic Grid',
+                description: 'Test your brain with increasingly difficult spatial puzzles.',
+                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-4',
+                category: 'Puzzle',
+                color: '#f97316'
+            }
+            ,
+            {
+                id: 'logic-grid',
+                title: 'Logic Grid',
+                description: 'Test your brain with increasingly difficult spatial puzzles.',
+                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-4',
+                category: 'Puzzle',
+                color: '#f97316'
+            }
+            ,
+            {
+                id: 'logic-grid',
+                title: 'Logic Grid',
+                description: 'Test your brain with increasingly difficult spatial puzzles.',
+                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-4',
+                category: 'Puzzle',
+                color: '#f97316'
+            }
+              ,
+            {
+                id: 'logic-grid',
+                title: 'Logic Grid',
+                description: 'Test your brain with increasingly difficult spatial puzzles.',
+                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-4',
+                category: 'Puzzle',
+                color: '#f97316'
+            }
+              ,
+            {
+                id: 'logic-grid',
+                title: 'Logic Grid',
+                description: 'Test your brain with increasingly difficult spatial puzzles.',
+                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-4',
+                category: 'Puzzle',
+                color: '#f97316'
+            }
+              ,
+            {
+                id: 'logic-grid',
+                title: 'Logic Grid',
+                description: 'Test your brain with increasingly difficult spatial puzzles.',
+                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-4',
+                category: 'Puzzle',
+                color: '#f97316'
+            }
+              ,
+            {
+                id: 'logic-grid',
+                title: 'Logic Grid',
+                description: 'Test your brain with increasingly difficult spatial puzzles.',
+                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-4',
+                category: 'Puzzle',
+                color: '#f97316'
+            }
+              ,
+            {
+                id: 'logic-grid',
+                title: 'Logic Grid',
+                description: 'Test your brain with increasingly difficult spatial puzzles.',
+                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
+                url: 'https://example.com/demo-game-4',
+                category: 'Puzzle',
+                color: '#f97316'
+            }
+        ];
+
+        function renderGames() {
+            const grid = document.getElementById('game-grid');
+            const badge = document.getElementById('game-count-badge');
+            
+            badge.innerText = `${GAME_LIST.length} Games Available`;
+            
+            grid.innerHTML = GAME_LIST.map(game => `
+                <div class="game-card glass-panel rounded-2xl overflow-hidden cursor-pointer group flex flex-col border border-slate-800" onclick="launchGame('${game.id}')">
+                    <div class="relative h-52 overflow-hidden">
+                        <img src="${game.thumbnail}" alt="${game.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent"></div>
+                        <div class="absolute bottom-4 left-4 flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full" style="background-color: ${game.color}"></div>
+                            <span class="text-[10px] uppercase font-bold tracking-widest text-white/90">${game.category}</span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors uppercase tracking-tight">${game.title}</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+                            ${game.description}
+                        </p>
+                        <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+                            <span class="text-xs text-slate-500 font-medium">Ready to Play</span>
+                            <div class="bg-blue-600/10 text-blue-500 p-2 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function launchGame(gameId) {
+            const game = GAME_LIST.find(g => g.id === gameId);
+            if (!game) return;
+
+            // Setup Player UI
+            document.getElementById('current-game-title').innerText = game.title;
+            document.body.style.overflow = 'hidden';
+            
+            const player = document.getElementById('game-player');
+            const loader = document.getElementById('loading-screen');
+            const iframe = document.getElementById('game-iframe');
+            
+            player.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            iframe.classList.add('hidden');
+
+            // Load the URL into the iframe
+            // Note: If using local files, ensure paths are correct relative to index.html
+            iframe.src = game.url;
+
+            // Simple event listener to hide loader once iframe is ready
+            iframe.onload = function() {
+                // Short delay for visual polish
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    iframe.classList.remove('hidden');
+                }, 800);
+            };
+        }
+
+        function showGallery() {
+            document.getElementById('game-player').classList.add('hidden');
+            document.getElementById('game-iframe').src = "about:blank";
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleFullscreen() {
+            const player = document.getElementById('game-player');
+            if (!document.fullscreenElement) {
+                player.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Boot
+        document.addEventListener('DOMContentLoaded', renderGames);
+    </script>
+</body>
+</html>
