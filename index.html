@@ -103,25 +103,51 @@
         
         <div id="loading-screen" class="flex-grow flex flex-col items-center justify-center space-y-4">
             <span class="loader"></span>
-            <p class="text-slate-400 animate-pulse font-mono tracking-tighter">MOUNTING VIRTUAL DISK...</p>
+            <p class="text-slate-400 animate-pulse font-mono tracking-tighter text-sm">MOUNTING VIRTUAL DISK...</p>
         </div>
 
-        <iframe id="game-iframe" class="game-viewport hidden" src="about:blank"></iframe>
+        <iframe id="game-iframe" class="game-viewport hidden" src="about:blank" allow="fullscreen"></iframe>
     </div>
 
     <script>
         /**
+         * DEMO CONTENT HELPER
+         * Creates a playable HTML blob for demonstration purposes.
+         */
+        const createDemoUrl = (title, bgColor) => {
+            const html = `
+                <!DOCTYPE html>
+                <html>
+                <body style="margin:0; background:${bgColor}; color:white; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; overflow:hidden;">
+                    <h1 style="font-size:3rem; margin-bottom:10px;">${title}</h1>
+                    <p style="opacity:0.7;">Game Engine Loaded Successfully</p>
+                    <div style="margin-top:20px; padding:20px; border:2px dashed rgba(255,255,255,0.3); border-radius:10px;">
+                        Interactive Area: Press Space to "Action"
+                    </div>
+                    <script>
+                        window.addEventListener('keydown', (e) => {
+                            if(e.code === 'Space') {
+                                document.body.style.filter = 'invert(1)';
+                                setTimeout(() => document.body.style.filter = 'none', 100);
+                            }
+                        });
+                    <\/script>
+                </body>
+                </html>
+            `;
+            return URL.createObjectURL(new Blob([html], { type: 'text/html' }));
+        };
+
+        /**
          * ADD MORE GAMES HERE
-         * You can add as many as you want.
-         * url: The path to the html file (e.g., 'games/my-game/index.html' or a full URL)
          */
         const GAME_LIST = [
             {
-                id: 'Chathusha3D',
-                title: '3D Flying',
+                id: 'neon-runner',
+                title: 'Neon Runner',
                 description: 'A high-speed synthwave avoidance game with procedural obstacles.',
-                thumbnail: 'chathusha3dFly.html',
-                url: 'chathusha.png', // Replace with your actual .html file path
+                thumbnail: '/chathusha.png',
+                url: createDemoUrl('chathusha3dFly.html', '#000'), 
                 category: 'Arcade',
                 color: '#ec4899'
             },
@@ -130,7 +156,7 @@
                 title: 'Pixel Quest',
                 description: 'Classic 8-bit RPG adventure. Explore dungeons and collect loot.',
                 thumbnail: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-2', 
+                url: createDemoUrl('PIXEL QUEST', '#1a2e1a'), 
                 category: 'Adventure',
                 color: '#22c55e'
             },
@@ -139,7 +165,7 @@
                 title: 'Void Racer',
                 description: 'Drift through the vacuum of space in this cosmic racing simulator.',
                 thumbnail: 'https://images.unsplash.com/photo-1614728263952-84ea206f2c40?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-3',
+                url: createDemoUrl('VOID RACER', '#020617'),
                 category: 'Racing',
                 color: '#9333ea'
             },
@@ -148,77 +174,16 @@
                 title: 'Logic Grid',
                 description: 'Test your brain with increasingly difficult spatial puzzles.',
                 thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-4',
+                url: createDemoUrl('LOGIC GRID', '#431407'),
                 category: 'Puzzle',
                 color: '#f97316'
-            }
-            ,
+            },
             {
-                id: 'logic-grid',
-                title: 'Logic Grid',
+                id: 'logic-grid-2',
+                title: 'Logic Grid Pro',
                 description: 'Test your brain with increasingly difficult spatial puzzles.',
                 thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-4',
-                category: 'Puzzle',
-                color: '#f97316'
-            }
-            ,
-            {
-                id: 'logic-grid',
-                title: 'Logic Grid',
-                description: 'Test your brain with increasingly difficult spatial puzzles.',
-                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-4',
-                category: 'Puzzle',
-                color: '#f97316'
-            }
-              ,
-            {
-                id: 'logic-grid',
-                title: 'Logic Grid',
-                description: 'Test your brain with increasingly difficult spatial puzzles.',
-                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-4',
-                category: 'Puzzle',
-                color: '#f97316'
-            }
-              ,
-            {
-                id: 'logic-grid',
-                title: 'Logic Grid',
-                description: 'Test your brain with increasingly difficult spatial puzzles.',
-                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-4',
-                category: 'Puzzle',
-                color: '#f97316'
-            }
-              ,
-            {
-                id: 'logic-grid',
-                title: 'Logic Grid',
-                description: 'Test your brain with increasingly difficult spatial puzzles.',
-                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-4',
-                category: 'Puzzle',
-                color: '#f97316'
-            }
-              ,
-            {
-                id: 'logic-grid',
-                title: 'Logic Grid',
-                description: 'Test your brain with increasingly difficult spatial puzzles.',
-                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-4',
-                category: 'Puzzle',
-                color: '#f97316'
-            }
-              ,
-            {
-                id: 'logic-grid',
-                title: 'Logic Grid',
-                description: 'Test your brain with increasingly difficult spatial puzzles.',
-                thumbnail: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=800',
-                url: 'https://example.com/demo-game-4',
+                url: createDemoUrl('LOGIC GRID PRO', '#431407'),
                 category: 'Puzzle',
                 color: '#f97316'
             }
@@ -262,7 +227,6 @@
             const game = GAME_LIST.find(g => g.id === gameId);
             if (!game) return;
 
-            // Setup Player UI
             document.getElementById('current-game-title').innerText = game.title;
             document.body.style.overflow = 'hidden';
             
@@ -274,16 +238,15 @@
             loader.classList.remove('hidden');
             iframe.classList.add('hidden');
 
-            // Load the URL into the iframe
-            // Note: If using local files, ensure paths are correct relative to index.html
+            // Load the actual content
             iframe.src = game.url;
 
-            // Simple event listener to hide loader once iframe is ready
             iframe.onload = function() {
-                // Short delay for visual polish
                 setTimeout(() => {
                     loader.classList.add('hidden');
                     iframe.classList.remove('hidden');
+                    // Focus the iframe so keyboard controls work immediately
+                    iframe.contentWindow.focus();
                 }, 800);
             };
         }
@@ -298,14 +261,13 @@
             const player = document.getElementById('game-player');
             if (!document.fullscreenElement) {
                 player.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                    console.error(`Error enabling full-screen: ${err.message}`);
                 });
             } else {
                 document.exitFullscreen();
             }
         }
 
-        // Boot
         document.addEventListener('DOMContentLoaded', renderGames);
     </script>
 </body>
