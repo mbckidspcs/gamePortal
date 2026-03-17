@@ -29,28 +29,49 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
+        .profile-ring {
+            padding: 2px;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            border-radius: 9999px;
+        }
     </style>
 </head>
 <body class="min-h-screen overflow-x-hidden">
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 glass-panel px-6 py-4 flex justify-between items-center">
+    <header class="sticky top-0 z-50 glass-panel px-6 py-3 flex justify-between items-center">
         <div class="flex items-center space-x-2 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
             <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4-4-4 4"/><path d="M17 12v9"/><path d="M10 3 6 7l-4-4"/><path d="M6 7v12"/><path d="M20 9V7a2 2 0 0 0-2-2h-3"/><path d="M4 15v2a2 2 0 0 0 2 2h3"/></svg>
             </div>
-            <h1 class="text-2xl font-extrabold tracking-tight uppercase">Game<span class="text-blue-500">Vault</span></h1>
+            <h1 class="text-2xl font-extrabold tracking-tight uppercase hidden sm:block">Game<span class="text-blue-500">Vault</span></h1>
         </div>
-        <div class="flex items-center space-x-4">
-            <span id="game-count-badge" class="bg-slate-800 text-slate-400 text-xs px-3 py-1 rounded-full border border-slate-700">0 Games Available</span>
+
+        <div class="flex items-center space-x-6">
+            <span id="game-count-badge" class="bg-slate-800 text-slate-400 text-xs px-3 py-1 rounded-full border border-slate-700 hidden md:inline-block">0 Games Available</span>
+            
+            <!-- Global Player Profile Section -->
+            <div class="flex items-center space-x-4 border-l border-slate-700 pl-6">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold leading-none">Alex Storm</p>
+                    <p class="text-[10px] text-blue-400 font-mono tracking-widest uppercase mt-1">Admin</p>
+                </div>
+                
+                <div class="relative cursor-pointer group">
+                    <div class="profile-ring group-hover:scale-105 transition-transform">
+                        <img src="https://i.pravatar.cc/150?u=admin" alt="Profile" class="w-10 h-10 rounded-full border-2 border-slate-900 object-cover">
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
     <!-- Main Content Area -->
     <main id="main-content" class="container mx-auto px-6 py-12">
-        <section class="mb-12">
-            <h2 class="text-4xl md:text-5xl font-black mb-4">Library</h2>
-            <p class="text-slate-400 text-lg text-balance">Browse your collection. Games will open in a <span class="text-blue-400">new tab</span> for the best experience.</p>
+        <section class="mb-12 text-center md:text-left">
+            <h2 class="text-4xl md:text-5xl font-black mb-4 tracking-tight">Game Library</h2>
+            <p class="text-slate-400 text-lg text-balance">Explore unique creations from developers around the world.</p>
         </section>
 
         <!-- Game Grid -->
@@ -62,23 +83,30 @@
     <script>
         /**
          * GAME LIST CONFIGURATION
+         * folder: the directory name inside your 'games' folder
+         * devPhoto: path to the developer's profile picture 
+         * (can be inside the game folder as 'dev.png' or a URL)
          */
         const GAME_LIST = [
-            {
+             {
                 id: 'FLYINGRACER3D',
                 title: 'FLYING RACER 3D',
                 description: 'FLYING RACER 3D BY Chathusha.',
                 folder: 'chathusha', 
                 category: 'Arcade',
-                color: '#ec4899'
+                color: '#ec4899',
+                developer: 'Chathusha',
+                devPhoto: 'prof.jpg'
             },
             {
                 id: 'NEON_RACER',
-                title: 'NEON_RACER',
+                title: 'NEON RACER',
                 description: 'NEON RACER by Oshadha',
                 folder: 'oshadha',
                 category: 'Adventure',
-                color: '#22c55e'
+                color: '#22c55e',
+                developer: 'Oshadha',
+                devPhoto: 'https://i.pravatar.cc/150?u=dev3'
             },
             {
                 id: 'void-racer',
@@ -86,11 +114,12 @@
                 description: 'Cosmic racing simulator in deep space.',
                 folder: 'void-racer',
                 category: 'Racing',
-                color: '#9333ea'
+                color: '#9333ea',
+                developer: 'StarShip_X',
+                devPhoto: 'https://i.pravatar.cc/150?u=dev3'
             }
         ];
 
-        // Base path where your games are stored
         const BASE_PATH = 'games';
 
         function renderGames() {
@@ -104,24 +133,40 @@
                 
                 return `
                 <div class="game-card glass-panel rounded-2xl overflow-hidden cursor-pointer group flex flex-col border border-slate-800" onclick="launchGame('${game.id}')">
-                    <div class="relative h-52 overflow-hidden bg-slate-800">
+                    <!-- Game Thumbnail -->
+                    <div class="relative h-48 overflow-hidden bg-slate-800">
                         <img src="${thumbPath}" 
                              alt="${game.title}" 
                              onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800'"
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent"></div>
-                        <div class="absolute bottom-4 left-4 flex items-center space-x-2">
+                        
+                        <!-- Category Tag -->
+                        <div class="absolute bottom-3 left-4 flex items-center space-x-2">
                             <div class="w-2 h-2 rounded-full" style="background-color: ${game.color}"></div>
                             <span class="text-[10px] uppercase font-bold tracking-widest text-white/90">${game.category}</span>
                         </div>
                     </div>
-                    <div class="p-6 flex-grow flex flex-col">
-                        <h3 class="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors uppercase tracking-tight">${game.title}</h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow">
+
+                    <!-- Card Body -->
+                    <div class="p-5 flex-grow flex flex-col">
+                        <!-- Dev Profile & Title -->
+                        <div class="flex items-center space-x-3 mb-3">
+                            <img src="${game.devPhoto}" alt="${game.developer}" 
+                                 class="w-8 h-8 rounded-full border border-slate-700 object-cover shadow-sm">
+                            <div class="overflow-hidden">
+                                <h3 class="text-lg font-bold group-hover:text-blue-400 transition-colors uppercase tracking-tight truncate">${game.title}</h3>
+                                <p class="text-[10px] text-slate-500 font-mono -mt-1 uppercase truncate">By ${game.developer}</p>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-grow line-clamp-2">
                             ${game.description}
                         </p>
+
+                        <!-- Footer -->
                         <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
-                            <span class="text-xs text-slate-500 font-medium font-mono">Launch New Tab</span>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Play Game</span>
                             <div class="bg-blue-600/10 text-blue-500 p-2 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -136,11 +181,7 @@
         function launchGame(gameId) {
             const game = GAME_LIST.find(g => g.id === gameId);
             if (!game) return;
-
-            // Construct the path to the game's HTML file
             const gamePath = `${BASE_PATH}/${game.folder}/index.html`;
-
-            // Open the game in a new tab
             window.open(gamePath, '_blank');
         }
 
