@@ -84,29 +84,29 @@
         /**
          * GAME LIST CONFIGURATION
          * folder: the directory name inside your 'games' folder
-         * devPhoto: path to the developer's profile picture 
-         * (can be inside the game folder as 'dev.png' or a URL)
+         * This script will look for:
+         * 1. games/[folder]/thumbnail.png (Background image)
+         * 2. games/[folder]/dev.png (Developer profile picture)
+         * 3. games/[folder]/index.html (The game itself)
          */
         const GAME_LIST = [
-             {
-                id: 'FLYINGRACER3D',
-                title: 'FLYING RACER 3D',
-                description: 'FLYING RACER 3D BY Chathusha.',
-                folder: 'chathusha', 
+            {
+                id: 'neon-runner',
+                title: 'Neon Runner',
+                description: 'A high-speed synthwave avoidance game.',
+                folder: 'neon-runner', 
                 category: 'Arcade',
                 color: '#ec4899',
-                developer: 'Chathusha',
-                devPhoto: 'prof.jpg'
+                developer: 'CyberByte'
             },
             {
-                id: 'NEON_RACER',
-                title: 'NEON RACER',
-                description: 'NEON RACER by Oshadha',
-                folder: 'oshadha',
+                id: 'pixel-quest',
+                title: 'Pixel Quest',
+                description: 'Classic 8-bit RPG adventure.',
+                folder: 'pixel-quest',
                 category: 'Adventure',
                 color: '#22c55e',
-                developer: 'Oshadha',
-                devPhoto: 'https://i.pravatar.cc/150?u=dev3'
+                developer: 'RetroMage'
             },
             {
                 id: 'void-racer',
@@ -115,8 +115,7 @@
                 folder: 'void-racer',
                 category: 'Racing',
                 color: '#9333ea',
-                developer: 'StarShip_X',
-                devPhoto: 'https://i.pravatar.cc/150?u=dev3'
+                developer: 'StarShip_X'
             }
         ];
 
@@ -130,6 +129,7 @@
             
             grid.innerHTML = GAME_LIST.map(game => {
                 const thumbPath = `${BASE_PATH}/${game.folder}/thumbnail.png`;
+                const devPhotoPath = `${BASE_PATH}/${game.folder}/dev.png`;
                 
                 return `
                 <div class="game-card glass-panel rounded-2xl overflow-hidden cursor-pointer group flex flex-col border border-slate-800" onclick="launchGame('${game.id}')">
@@ -152,8 +152,10 @@
                     <div class="p-5 flex-grow flex flex-col">
                         <!-- Dev Profile & Title -->
                         <div class="flex items-center space-x-3 mb-3">
-                            <img src="${game.devPhoto}" alt="${game.developer}" 
-                                 class="w-8 h-8 rounded-full border border-slate-700 object-cover shadow-sm">
+                            <img src="${devPhotoPath}" 
+                                 alt="${game.developer}" 
+                                 onerror="this.src='https://i.pravatar.cc/150?u=${game.developer}'"
+                                 class="w-10 h-10 rounded-full border border-slate-700 object-cover shadow-sm bg-slate-900">
                             <div class="overflow-hidden">
                                 <h3 class="text-lg font-bold group-hover:text-blue-400 transition-colors uppercase tracking-tight truncate">${game.title}</h3>
                                 <p class="text-[10px] text-slate-500 font-mono -mt-1 uppercase truncate">By ${game.developer}</p>
@@ -166,7 +168,7 @@
 
                         <!-- Footer -->
                         <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
-                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Play Game</span>
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Launch App</span>
                             <div class="bg-blue-600/10 text-blue-500 p-2 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
